@@ -1,0 +1,65 @@
+---
+- hosts: all
+  vars:
+   users:
+     - popopame
+
+  tasks:
+   - name: "Create user accounts and add users to admin groups"
+     user:
+       name: "{{ item }}"
+       groups: "wheel"
+     with_items: "{{ users }}"
+   - name: "Add authorized key"
+     authorized_key:
+       user: "{{ item }}"
+       state: "present"
+       key: "{{ lookup('file', '/KHW/ssh_key_ansible/inventory/'+item+'.key.pub') }}"
+     with_items: "{{ users }}"
+   - name: "Allow admin users to sudo without password"
+     lineinfile:
+       dest: "/etc/sudoers"
+       state: "present"
+       regexp: "^%admin"
+       line: "%admin ALL=(ALL) NOPASSWD: ALL"
+   - name: "Copy the api key on the masters"
+     hosts: "masters"
+     copy:
+       scr: "/KHW/pki/api/kubernetes-key.pem"
+       dest: "/"
+   - name: "Copy the api certificate on the masters"
+     hosts: "masters"
+     copy:
+       scr: "/KHW/pki/api/kubernetes.pem"
+       dest: "/"
+   - name: "Copy the ca certificate"
+     hosts: "masters"
+     copy:
+       scr: "/KHW/pki/ca/ca.pem"
+       dest: "/"
+   - name: "Copy the ca key"
+     hosts: "masters"
+     copy:
+       scr: "/KHW/pki/ca/ca-key.pem"
+       dest: "/"
+   - name: "Copy the ca certificate on the slaves hosts"
+     hosts: "slaves"
+     copy:
+       scr: "/KHW/pki/ca/ca.pem"
+       dest: "/"
+   - name: "Copy the slave02 clients key on slave01"
+     hosts: "slave01"
+     copy:
+       scr: "/KHW/pki/clients/slave02-key.pem"
+       dest: "/"
+     copy:
+       scr: "/KHW/pki/clients/slave02.pem"
+       dest: "/"
+   - name: "Copy the slave03 clients key on slave01"
+     hosts: "slave01"
+     copy:
+       scr: "/KHW/pki/clients/slave03-key.pem"
+       dest: "/"
+     copy:
+       scr: "/KHW/pki/clients/slave03.pem"
+       dest: "/"
