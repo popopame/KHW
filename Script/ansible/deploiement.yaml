@@ -22,64 +22,64 @@
        state: "present"
        regexp: "^%admin"
        line: "%admin ALL=(ALL) NOPASSWD: ALL"
-   - name: "Copy the api key on the masters"
-     hosts: "masters"
-     copy:
-       scr: "/KHW/pki/api/kubernetes-key.pem"
-       dest: "/"
-   - name: "Copy the api certificate on the masters"
-     hosts: "masters"
-     copy:
-       scr: "/KHW/pki/api/kubernetes.pem"
-       dest: "/"
-   - name: "Copy the ca certificate"
-     hosts: "masters"
-     copy:
-       scr: "/KHW/pki/ca/ca.pem"
-       dest: "/"
-   - name: "Copy the ca key"
-     hosts: "masters"
-     copy:
-       scr: "/KHW/pki/ca/ca-key.pem"
-       dest: "/"
-   - name: "Copy the ca certificate on the slaves hosts"
-     hosts: "slaves"
-     copy:
-       scr: "/KHW/pki/ca/ca.pem"
-       dest: "/"
 
-      
-   - name: "Copy the slave01 clients key on slave01"
-     hosts: "slave01"
-     copy:
-       scr: "/KHW/pki/clients/slave01-key.pem"
-       dest: "/"
-   - name: "Copy the slave01 clients certificate on slave01"
-     hosts: "slave01"
-     copy:
-       scr: "/KHW/pki/clients/slave01.pem"
-       dest: "/"
+- hosts: kube-masters
+  tasks:
+     - name: "Upload the api key on the Masters nodes"
+       copy:
+            src: "/KHW/pki/api/kubernetes-key.pem"
+            dest: "/"
+     - name: "Copy the api certificate on the masters"
+       copy:
+            src: "/KHW/pki/api/kubernetes.pem"
+            dest: "/"
+     - name: "Copy the api certificate on the masters"
+       copy:
+            src: "/KHW/pki/api/kubernetes.pem"
+            dest: "/"
+     - name: "Copy the ca key"
+       copy:
+            src: "/KHW/pki/ca/ca-key.pem"
+            dest: "/"
 
 
-   - name: "Copy the slave02 clients key on slave02"
-     hosts: "slave02"
-     copy:
-       scr: "/KHW/pki/clients/slave02-key.pem"
-       dest: "/"
-   - name: "Copy the slave02 clients certificate on slave02"
-     hosts: "slave02"
-     copy:
-       scr: "/KHW/pki/clients/slave02.pem"
-       dest: "/"
 
+- hosts: kube-slaves
+  tasks:
+      - name: "Copy the ca certificate on the slaves hosts"
+        copy:
+          src: "/KHW/pki/ca/ca.pem"
+          dest: "/"
 
-   - name: "Copy the slave03 clients key on slave03"
-     hosts: "slave03"
-     copy:
-       scr: "/KHW/pki/clients/slave03-key.pem"
-       dest: "/"
-   - name: "Copy the slave03 clients certificate on slave03"
-     hosts: "slave03"
-     copy:
-       scr: "/KHW/pki/clients/slave03.pem"
-       dest: "/"
+- hosts: node1
+  tasks:
+     - name: "Copy the slave01 clients key on slave01"
+       copy:
+            src: "/KHW/pki/clients/slave01-key.pem"
+            dest: "/"
+     - name: "Copy the slave01 clients certificate on slave01"
+       copy:
+            src: "/KHW/pki/clients/slave01.pem"
+            dest: "/"
+
+- hosts: node2
+  tasks:
+    - name: "Copy the slave02 clients key on slave02"
+      copy:
+           src: "/KHW/pki/clients/slave02-key.pem"
+           dest: "/"
+    - name: "Copy the slave02 clients certificate on slave01"
+      copy:
+           src: "/KHW/pki/clients/slave02.pem"
+           dest: "/"
+
+- hosts: node3
+  tasks:
+    - name: "Copy the slave03 clients key on slave03"
+      copy:
+           src: "/KHW/pki/clients/slave03-key.pem"
+           dest: "/"
+    - name: "Copy the slave03 clients certificate on slave03"
+      copy:
+           src: "/KHW/pki/clients/slave03.pem"
+           dest: "/"
