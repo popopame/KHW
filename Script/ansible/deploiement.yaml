@@ -14,7 +14,7 @@
      authorized_key:
        user: "{{ item }}"
        state: "present"
-       key: "{{ lookup('file', '/KHW/ssh_key_ansible/inventory/'+item+'.key.pub') }}"
+       key: "{{ lookup('file', '/KHW/ansible/inventory/'+item+'.key.pub') }}"
      with_items: "{{ users }}"
    - name: "Allow admin users to sudo without password"
      lineinfile:
@@ -47,19 +47,39 @@
      copy:
        scr: "/KHW/pki/ca/ca.pem"
        dest: "/"
-   - name: "Copy the slave02 clients key on slave01"
+
+      
+   - name: "Copy the slave01 clients key on slave01"
      hosts: "slave01"
+     copy:
+       scr: "/KHW/pki/clients/slave01-key.pem"
+       dest: "/"
+   - name: "Copy the slave01 clients certificate on slave01"
+     hosts: "slave01"
+     copy:
+       scr: "/KHW/pki/clients/slave01.pem"
+       dest: "/"
+
+
+   - name: "Copy the slave02 clients key on slave02"
+     hosts: "slave02"
      copy:
        scr: "/KHW/pki/clients/slave02-key.pem"
        dest: "/"
+   - name: "Copy the slave02 clients certificate on slave02"
+     hosts: "slave02"
      copy:
        scr: "/KHW/pki/clients/slave02.pem"
        dest: "/"
-   - name: "Copy the slave03 clients key on slave01"
-     hosts: "slave01"
+
+
+   - name: "Copy the slave03 clients key on slave03"
+     hosts: "slave03"
      copy:
        scr: "/KHW/pki/clients/slave03-key.pem"
        dest: "/"
+   - name: "Copy the slave03 clients certificate on slave03"
+     hosts: "slave03"
      copy:
        scr: "/KHW/pki/clients/slave03.pem"
        dest: "/"
