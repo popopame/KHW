@@ -1,19 +1,25 @@
 # Kubernetes the Hard Way , On-Premise/Baremetal
-### 1.Intro
+### Introduction
+### About Me
 
+### Course Introduction and Tools used
 ___
+### 1. Get started
 
-### 2.Creation of the computes instances
+#### 1.1 Understand How Kubernetes Work
 
-### 3.Installation of the tools
-#### What we will install
+#### 1.2 What will our Cluster Look like
 
-We will need 3 tools installed on the Bastion host:
-* ***cfssl***: is CloudFlare PKI/TLS toolkit , wich will help create the certificates
-* ***cfssljson***: the cfssljson will take the JSON output from cfssl , and will write the generated certificate to the disk.
-* ***kubectl***: This is the Kubernetes command-line tool , your best-friend during this course.
+I created 6 compute instances:
+* ***3 Slaves*** : Each one with 2 cores , 4 Go of RAM and 30Go of Disk space
+* ***3 Masters*** : Each one with 4 cores , 8Go of RAM and 30Go of Disk Space
 
-#### Install the Packet
+I created all of these on my Lab Server , with Proxmox Installed on it.
+If you do not have access to a spare server , you do not have a Homelab and you don't want to rent for a server you can deploy this infrastrucre on your co
+
+
+#### 1.3 Setting up your compute instance and tools
+
 
 First we download the program , the two cfssl packet come from the Kubernetes the Hard Way github
 and the kubectl one come from google website
@@ -30,17 +36,21 @@ chmod +x cfssl cfssljson kubectl
 mv cfssl cfssljson kubectl /usr/local/bin
 ```
 
-### 4.Generate the certificate
+
+### 2 Provisioning the CA and Generating the TLS certificates
+
+#### 2.1 What are CA/TLS and why do we need them ?
+
+#### 2.2 CA/TLS in a Kubernetes cluster
+
+#### 2.3 Generate the CA
+
+#### 2.4 Generate the certificate
+
+#### 2.5 Deploy the certificates
 
 We will now generate a PKI infrastructure , and create all the certificate for
 the kubernetes cluster.
 
-#### 4.1 What is a PKI infrastructure ?
-
-
-#### 4.2 Onto the creation !
-
-
-### 4.3 Deploy the certificate
 
 ```ansible-playbook -i inventory/hosts.yml -u root -k deploiement.yaml```
