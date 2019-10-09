@@ -4,7 +4,25 @@
    users:
      - popopame
 
+
+#Installation of needed packet and update of the distant host
   tasks:
+   - name: "Installation of 3 packet that will help us later"
+     yum:
+       name: "{{ packages }}"
+     vars:
+       packages:
+         - net-tools
+         - conntrack
+         - socat
+   - name: "Update of the System"
+     yum:
+       name: "*"
+       state: latest
+       update_cache: yes
+
+#Creation of user/s referenced in "users" var , and creation of their ssh key
+
    - name: "Create user accounts and add users to admin groups"
      user:
        name: "{{ item }}"
@@ -20,9 +38,10 @@
      lineinfile:
        dest: "/etc/sudoers"
        state: "present"
-       regexp: "^%admin"
-       line: "%admin ALL=(ALL) NOPASSWD: ALL"
+       regexp: "^%wheel"
+       line: "%wheel ALL=(ALL) NOPASSWD: ALL"
 
+#Deploiement of the certificate and the key on the hosts
 - hosts: kube-masters
   tasks:
      - name: "Upload the api key on the Masters nodes"

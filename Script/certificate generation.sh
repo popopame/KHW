@@ -1,6 +1,16 @@
-#This bellw will generate the certificate Authority
-#This  certificate will be used to create all the other certificate
+#Below are the variables that you need to customise so that they correspond to your envirronement
+
+TLS_C="FR"
+TLS_L="PopoVille"
+TLS_OU="PopoKubernetes"
+TLS_ST="PopoVille"
+declare -a SLAVES_IPS=("10.98.0.20" "10.98.0.21" "10.98.0.22")
+declare -a SLAVES_HOSTNAMES=("slave01" "slave02" "slave03")
+
 mkdir -p pki/{admin,api,ca,clients,controller,proxy,scheduler,service-account}
+
+#This code  bellow will generate the certificate Authority
+#This  certificate will be used to create all the other certificate
 
 cat > pki/ca/ca-config.json <<EOF
 {
@@ -27,11 +37,11 @@ cat > pki/ca/ca-csr.json <<EOF
   },
   "names": [
     {
-      "C": "FR",
-      "L": "Neuilly-Plaisance",
+      "C": "${TLS_C}",
+      "L": "${TLS_L}",
       "O": "Kubernetes",
-      "OU": "PopoKube",
-      "ST": "popotown"
+      "OU": "${TLS_OU}",
+      "ST": "${TLS_ST}"
     }
   ]
 }
@@ -49,11 +59,11 @@ cat > pki/admin/admin-csr.json <<EOF
   },
   "names": [
     {
-      "C": "FR",
-      "L": "Neuilly-Plaisance",
-      "O": "Kubernetes",
-      "OU": "PopoKube",
-      "ST": "popotown"
+      "C": "${TLS_C}",
+      "L": "${TLS_L}",
+      "O": "system:masters",
+      "OU": "${TLS_OU}",
+      "ST": "${TLS_ST}"
     }
   ]
 }
@@ -71,24 +81,22 @@ cfssl gencert \
 #On my scenatio , the node are in a private NAT , I only declare their hostnames and Private IP. I use a for loop to do so
 
 
-declare -a ips=("10.98.0.20" "10.98.0.21" "10.98.0.22")
-declare -a hostnames=("slave01" "slave02" "slave03")
 for i in {0..2}; do
 
-  cat > pki/clients/${hostnames[$i]}-csr.json <<EOF
+  cat > pki/clients/${SLAVES_HOSTNAMES[$i]}-csr.json <<EOF
 {
-  "CN": "system:node:${hostnames[$i]}",
+  "CN": "system:node:${SLAVES_HOSTNAMES[$i]}",
   "key": {
     "algo": "rsa",
     "size": 2048
   },
   "names": [
     {
-      "C": "FR",
-      "L": "Neuilly-Plaisance",
-      "O": "system:kubelet",
-      "OU": "PopoKube",
-      "ST": "popotown"
+      "C": "${TLS_C}",
+      "L": "${TLS_L}",
+      "O": "system:slaves",
+      "OU": "${TLS_OU}",
+      "ST": "${TLS_ST}"
     }
   ]
 }
@@ -98,9 +106,9 @@ cfssl gencert \
   -ca=pki/caca.pem \
   -ca-key=pki/ca/ca-key.pem \
   -config=pki/ca/ca-config.json \
-  -hostname=${hostnames[$i]},${ips[$i]} \
+  -hostname=${SLAVES_HOSTNAMES[$i]},${SLAVES_IPS[$i]} \
   -profile=kubernetes \
-  pki/clients/${hostnames[$i]}-csr.json | cfssljson -bare pki/clients/${hostnames[$i]}
+  pki/clients/${SLAVES_HOSTNAMES[$i]}-csr.json | cfssljson -bare pki/clients/${SLAVES_HOSTNAMES[$i]}
 done
 
 #We will generate here the kube-controller certificate
@@ -113,11 +121,11 @@ cat > pki/controller/kube-controller-manager-csr.json <<EOF
   },
   "names": [
     {
-      "C": "FR",
-      "L": "Neuilly-Plaisance",
-      "O": "system:kube-controller",
-      "OU": "PopoKube",
-      "ST": "popotown"
+      "C": "${TLS_C}",
+      "L": "${TLS_L}",
+      "O": "systems:kube-controller-manager",
+      "OU": "${TLS_OU}",
+      "ST": "${TLS_ST}"
     }
   ]
 }
@@ -141,11 +149,11 @@ cat > pki/proxy/kube-proxy-csr.json <<EOF
   },
   "names": [
     {
-      "C": "FR",
-      "L": "Neuilly-Plaisance",
+      "C": "${TLS_C}",
+      "L": "${TLS_L}",
       "O": "system:node-proxier",
-      "OU": "PopoKube",
-      "ST": "popotown"
+      "OU": "${TLS_OU}",
+      "ST": "${TLS_ST}"
     }
   ]
 }
@@ -227,7 +235,7 @@ cat > pki/service-account/service-account-csr.json <<EOF
     {
       "C": "FR",
       "L": "Neuilly-Plaisance",
-      "O": "system:API-endpoint",
+      "O": "Kubernetes",
       "OU": "PopoKube",
       "ST": "popotown"
     }
