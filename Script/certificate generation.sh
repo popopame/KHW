@@ -103,7 +103,7 @@ for i in {0..2}; do
 EOF
 
 cfssl gencert \
-  -ca=pki/caca.pem \
+  -ca=pki/ca/ca.pem \
   -ca-key=pki/ca/ca-key.pem \
   -config=pki/ca/ca-config.json \
   -hostname=${SLAVES_HOSTNAMES[$i]},${SLAVES_IPS[$i]} \

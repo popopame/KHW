@@ -70,7 +70,7 @@
           src: "/KHW/pki/ca/ca.pem"
           dest: "/"
 
-- hosts: node1
+- hosts: slave01
   tasks:
      - name: "Copy the slave01 clients key on slave01"
        copy:
@@ -81,7 +81,7 @@
             src: "/KHW/pki/clients/slave01.pem"
             dest: "/"
 
-- hosts: node2
+- hosts: slave02
   tasks:
     - name: "Copy the slave02 clients key on slave02"
       copy:
@@ -92,7 +92,7 @@
            src: "/KHW/pki/clients/slave02.pem"
            dest: "/"
 
-- hosts: node3
+- hosts: slave03
   tasks:
     - name: "Copy the slave03 clients key on slave03"
       copy:

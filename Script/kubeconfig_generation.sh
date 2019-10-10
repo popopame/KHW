@@ -11,6 +11,8 @@ mkdir -p configs/{admin,clients,controller,proxy,scheduler,encrypt}
 #Generate the Kubeconfig file for each slave node
 
 for instance in ${SLAVES_HOSTNAMES[@]}; do
+  echo Creation of the Kubeconfig for ${instance}
+
   kubectl config set-cluster KHW-cluster \
     --certificate-authority=pki/ca/ca.pem \
     --embed-certs=true \
@@ -34,6 +36,7 @@ done
 
 
 #Generating the Kubeconfig  file for the kube-proxy
+echo Genetaring kube-proxy Kubeconfig
 
 kubectl config set-cluster KHW-cluster \
   --certificate-authority=pki/ca/ca.pem \
@@ -55,6 +58,7 @@ kubectl config set-context default \
 kubectl config use-context default --kubeconfig=configs/proxy/kube-proxy.kubeconfig
 
 #Generating kube-controller-manager Kubeconfig
+echo Generating controller kubeconfig
 
 kubectl config set-cluster KHW-cluster \
   --certificate-authority=pki/ca/ca.pem \
@@ -77,6 +81,8 @@ kubectl config use-context default --kubeconfig=configs/controller/kube-controll
 
 #Generating kube-sheduler kubeconfig
 
+echo Generating kube-scheduler kubeconfig
+
 kubectl config set-cluster KHW-cluster \
   --certificate-authority=pki/ca/ca.pem \
   --embed-certs=true \
@@ -97,6 +103,7 @@ kubectl config set-context default \
 kubectl config use-context default --kubeconfig=configs/scheduler/kube-scheduler.kubeconfig
 
 #Generating the admin kubeconfig
+echo generating admin kubeconfig
 
 kubectl config set-cluster KHW-cluster \
   --certificate-authority=pki/ca/ca.pem \
@@ -115,15 +122,17 @@ kubectl config set-context default \
   --user=admin \
   --kubeconfig=configs/admin/admin.kubeconfig
 
-kubectl config use-context default --kubeconfig=admin.kubeconfig
+kubectl config use-context default --kubeconfig=configs/admin/admin.kubeconfig
 
 
 #Generation of the Encryption config file
 #To generate the encryption key , we take a random string of 32 characters
 
+echo Creattion of the encrytpion file
+
 ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
 
-cat > encrypt/encryption-config.yaml <<EOF
+cat > configs/encrypt/encryption-config.yaml <<EOF
 kind: EncryptionConfig
 apiVersion: v1
 resources:
