@@ -15,6 +15,8 @@
          - net-tools
          - conntrack
          - socat
+         - wget
+         - vim
    - name: "Update of the System"
      yum:
        name: "*"
@@ -52,9 +54,9 @@
        copy:
             src: "/KHW/pki/api/kubernetes.pem"
             dest: "/"
-     - name: "Copy the api certificate on the masters"
+     - name: "Copy the CA on the master"
        copy:
-            src: "/KHW/pki/api/kubernetes.pem"
+            src: "/KHW/pki/ca/ca-key.pem"
             dest: "/"
      - name: "Copy the ca key"
        copy:
