@@ -67,3 +67,38 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 ```
+
+After that , we need to reload the daemon so that the changes are used.
+Then , we can enable the service at startup , and start the service.
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable etcd
+sudo systemctl start etcd
+```
+I recommend to to a ```systemctl status etcd``` to see if everything run smoothly
+
+
+You can now test to see if your etcd cluster is working:
+
+```bash
+sudo ETCDCTL_API=3 etcdctl member list \
+  --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/etcd/ca.pem \
+  --cert=/etc/etcd/kubernetes.pem \
+  --key=/etc/etcd/kubernetes-key.pem
+#You should have an output that look like This
+1748aef7d885aa5e, started, master03, https://10.98.0.18:2380, https://10.98.0.18:2379
+aaaab241db54789c, started, master02, https://10.98.0.17:2380, https://10.98.0.17:2379
+e15ab1211a4b4e4e, started, master01, https://10.98.0.16:2380, https://10.98.0.16:2379
+```
+
+
+
+
+If you have a bug , you should look for these:
+
+* Error in the etcd.service file : typos in names or file path
+* Error in the certificate file: look if the IP you autorized correspond
+* If all the files are were they should
+
+If you still struggle , don't hesite to ask me , or anyone on the web , the Open-Source Community is full of good-hearted people !
