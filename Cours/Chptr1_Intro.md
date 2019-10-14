@@ -17,13 +17,22 @@ But if you want to dive in Kubernetes , you might not have acces to GCP ressourc
 
 My name is Gabin , I am 21 years old and currently living in france.
 Passionate about new technologies , my goal is to learn new thing everyday and to help people learn too !
+That's why i'm so found about the Open Source community.
 
 
-### Course Introduction and Tools used
+###  Tools used
+As we said earlier , we will do it the "hard way" , so , there is no "obligatory tools" (minus the servers on wich we will deploy kubernetes) , **but**  you can use tool to help you along the way , or to speed up the process (if you wan't to restart again an you wan't to skip boring part).
+
+I will give you bash script and some Ansible playbook **Theses will not help you deploy the cluster** , but they might speed up tidious task (like deploying same files on distants hosts , install package ,generating certificate , ect...). If you do not want to use the script you can do everithing by hand.
+
+I also recommend using tmux , a package that can help execute the same command on differents hosts , wich will be really helpfull.
 ___
 ### 1. Get started
 
 #### 1.1 Understand How Kubernetes Work: The Big Picture
+
+The first thing to understand is how Kubernetes work in the Big Picture , we are not going to Deep-Dive into it , but a basic understanding is usefull.
+
 
 #### 1.2 What will our Cluster Look like
 

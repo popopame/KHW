@@ -60,10 +60,16 @@
             dest: "/"
      - name: "Copy the ca key"
        copy:
+            src: "/KHW/pki/service-account.pem"
+            dest: "/"
+     - name: "Copy the service account key"
+       copy:
+            src: "/KHW/pki/service-account-key.pem"
+            dest: "/"
+     - name: "Copy the service account certificate"
+       copy:
             src: "/KHW/pki/ca/ca-key.pem"
             dest: "/"
-
-
 
 - hosts: kube-slaves
   tasks:
