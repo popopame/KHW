@@ -21,6 +21,12 @@ sudo mv etcd-v3.3.9-linux-amd64/etcd* /usr/local/bin/
 
 ```
 
+Copy the certificate on the etcd lib folder:
+
+```bash
+mkdir -p /etc/etcd /var/lib/etcd
+cp /ca.pem /kubernetes-key.pem /kubernetes.pem /etc/etcd/
+```
 Once this is done , we create a file named ```etcd.service```.
 In this we will put all our configuration.
 
@@ -86,6 +92,8 @@ sudo ETCDCTL_API=3 etcdctl member list \
   --cacert=/etc/etcd/ca.pem \
   --cert=/etc/etcd/kubernetes.pem \
   --key=/etc/etcd/kubernetes-key.pem
+
+
 #You should have an output that look like This
 1748aef7d885aa5e, started, master03, https://10.98.0.18:2380, https://10.98.0.18:2379
 aaaab241db54789c, started, master02, https://10.98.0.17:2380, https://10.98.0.17:2379
@@ -94,11 +102,19 @@ e15ab1211a4b4e4e, started, master01, https://10.98.0.16:2380, https://10.98.0.16
 
 
 
+___
+**It doesn't Start/Don't work/I have a Bug: What to do**
 
 If you have a bug , you should look for these:
 
 * Error in the etcd.service file : typos in names or file path
-* Error in the certificate file: look if the IP you autorized correspond
+* Error in the certificate file: look if the IP you autorized correspond to the ones you are using
 * If all the files are were they should
+
+If you have an error , it probably comes from a typo in your file.
+You can see the logs of etcd(or any system related logs that might help you) by tiping one of these following commands:
+* ```bash tail /var/log/messages ``` : will display the last line of the system log
+* ```bash journalctl etcd -u etcd ``` : Will display the logs of etcd services
+* ```bash systemctl status etcd ``` : Will display the status of the etcd service , as well a the last log line of the service
 
 If you still struggle , don't hesite to ask me , or anyone on the web , the Open-Source Community is full of good-hearted people !
