@@ -17,6 +17,7 @@
          - socat
          - wget
          - vim
+         - epel-release
    - name: "Update of the System"
      yum:
        name: "*"
@@ -56,19 +57,21 @@
             dest: "/"
      - name: "Copy the CA on the master"
        copy:
+            src: "/KHW/pki/ca/ca.pem"
+            dest: "/"
+     - name: "Copy the CA  key on the master"
+       copy:
             src: "/KHW/pki/ca/ca-key.pem"
             dest: "/"
-     - name: "Copy the ca key"
-       copy:
-            src: "/KHW/pki/service-account.pem"
-            dest: "/"
+
+
      - name: "Copy the service account key"
        copy:
-            src: "/KHW/pki/service-account-key.pem"
+            src: "/KHW/pki/service-account/service-account-key.pem"
             dest: "/"
      - name: "Copy the service account certificate"
        copy:
-            src: "/KHW/pki/ca/ca-key.pem"
+            src: "/KHW/pki/service-account/service-account.pem"
             dest: "/"
 
 - hosts: kube-slaves

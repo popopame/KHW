@@ -1,9 +1,9 @@
 #Below are the variables that you need to customise so that they correspond to your envirronement
 
 TLS_C="FR"
-TLS_L="PopoVille"
-TLS_OU="PopoKubernetes"
-TLS_ST="PopoVille"
+TLS_L="Neuilly-Plaisance"
+TLS_OU="CA"
+TLS_ST="Seine-Saint-Denis"
 declare -a SLAVES_IPS=("10.98.0.20" "10.98.0.21" "10.98.0.22")
 declare -a SLAVES_HOSTNAMES=("slave01" "slave02" "slave03")
 
@@ -30,7 +30,7 @@ EOF
 
 cat > pki/ca/ca-csr.json <<EOF
 {
-  "CN": "Kubernetes",
+  "CN": "kubernetes",
   "key": {
     "algo": "rsa",
     "size": 2048
@@ -39,7 +39,7 @@ cat > pki/ca/ca-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "Kubernetes",
+      "O": "kubernetes",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -47,12 +47,13 @@ cat > pki/ca/ca-csr.json <<EOF
 }
 EOF
 
-#Below we will generate the Admin certificate
 cfssl gencert -initca pki/ca/ca-csr.json | cfssljson -bare pki/ca/ca
 
+
+#Below we will generate the Admin certificate
 cat > pki/admin/admin-csr.json <<EOF
 {
-  "CN": "admin",
+  "CN": "system:admin",
   "key": {
     "algo": "rsa",
     "size": 2048
@@ -61,7 +62,7 @@ cat > pki/admin/admin-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "system:masters",
+      "O": "kubernetes",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -94,7 +95,7 @@ for i in {0..2}; do
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "system:slaves",
+      "O": "kubernetes",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -123,7 +124,7 @@ cat > pki/controller/kube-controller-manager-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "systems:kube-controller-manager",
+      "O": "kubernetes",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -151,7 +152,7 @@ cat > pki/proxy/kube-proxy-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "system:node-proxier",
+      "O": "kubernetes",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -177,11 +178,11 @@ cat > pki/scheduler/kube-scheduler-csr.json <<EOF
   },
   "names": [
     {
-      "C": "FR",
-      "L": "Neuilly-Plaisance",
-      "O": "system:kube-scheduler",
-      "OU": "PopoKube",
-      "ST": "popotown"
+      "C": "${TLS_C}",
+      "L": "${TLS_L}",
+      "O": "kubernetes",
+      "OU": "${TLS_OU}",
+      "ST": "${TLS_ST}"
     }
   ]
 }
@@ -204,11 +205,11 @@ cat > pki/api/kubernetes-csr.json <<EOF
   },
   "names": [
     {
-      "C": "FR",
-      "L": "Neuilly-Plaisance",
-      "O": "system:API-endpoint",
-      "OU": "PopoKube",
-      "ST": "popotown"
+      "C": "${TLS_C}",r
+      "L": "${TLS_L}",
+      "O": "kubernetes",
+      "OU": "${TLS_OU}",
+      "ST": "${TLS_ST}"
     }
   ]
 }
@@ -218,7 +219,7 @@ cfssl gencert \
   -ca=pki/ca/ca.pem \
   -ca-key=pki/ca/ca-key.pem \
   -config=pki/ca/ca-config.json \
-  -hostname=10.32.0.1,10.98.0.16,10.98.0.17,10.98.0.18,10.98.0.19,127.0.0.1,kubernetes.default \
+  -hostname=10.32.0.1,10.98.0.12,10.98.0.29,10.98.0.30,10.98.0.19,127.0.0.1,kubernetes.default \
   -profile=kubernetes \
   pki/api/kubernetes-csr.json | cfssljson -bare pki/api/kubernetes
 
@@ -233,11 +234,11 @@ cat > pki/service-account/service-account-csr.json <<EOF
   },
   "names": [
     {
-      "C": "FR",
-      "L": "Neuilly-Plaisance",
-      "O": "Kubernetes",
-      "OU": "PopoKube",
-      "ST": "popotown"
+      "C": "${TLS_C}",
+      "L": "${TLS_L}",
+      "O": "kubernetes",
+      "OU": "${TLS_OU}",
+      "ST": "${TLS_ST}"
     }
   ]
 }
