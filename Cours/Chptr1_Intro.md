@@ -31,7 +31,10 @@ ___
 
 #### 1.1 Understand How Kubernetes Work: The Big Picture
 
-The first thing to understand is how Kubernetes work in the Big Picture , we are not going to Deep-Dive into it , but a basic understanding is usefull.
+The first thing to understand is how Kubernetes work in the Big Picture , we are not going to Deep-Dive into it , but a basic understanding is mendatory.
+
+We will describe the big physical components of the cluster: Masters nodes and Worker nodes.
+Then we will describe what logical components are stored on these , and how they interact.
 
 
 #### 1.2 What will our Cluster Look like

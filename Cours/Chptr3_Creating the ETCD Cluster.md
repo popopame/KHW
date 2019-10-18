@@ -17,7 +17,7 @@ Unpack it and move it on the bin folder , so that we can call him with the CLI
 wget --secure-protocol=auto "https://github.com/coreos/etcd/releases/download/v3.3.9/etcd-v3.3.9-linux-amd64.tar.gz"
 
 tar -xvf etcd-v3.3.9-linux-amd64.tar.gz
-sudo mv etcd-v3.3.9-linux-amd64/etcd* /usr/local/bin/
+sudo mv etcd-v3.3.9-linux-amd64/etcd* /usr/bin/
 
 ```
 
@@ -64,7 +64,7 @@ ExecStart=/usr/bin/etcd \\
   --listen-client-urls https://${INTERNAL_IP}:2379,https://127.0.0.1:2379 \\
   --advertise-client-urls https://${INTERNAL_IP}:2379 \\
   --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster master01=https://10.98.0.16:2380,master02=https://10.98.0.17:2380,master03=https://10.98.0.18:2380 \\
+  --initial-cluster master01=https://10.98.0.12:2380,master02=https://10.98.0.37:2380,master03=https://10.98.0.38:2380 \\
   --initial-cluster-state new \\
   --data-dir=/var/lib/etcd
 Restart=on-failure

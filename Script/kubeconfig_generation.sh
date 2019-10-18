@@ -1,6 +1,6 @@
 #Declaration of the Variables needed in this script , you need to modify these so that they correspond to your infrastrucre
 
-declare -a SLAVES_IPS=("10.98.0.20" "10.98.0.21" "10.98.0.22")
+declare -a SLAVES_IPS=("10.98.0.31" "10.98.0.32" "10.98.0.33")
 declare -a SLAVES_HOSTNAMES=("slave01" "slave02" "slave03")
 KUBERNETES_PUBLIC_IP=("10.98.0.19")
 

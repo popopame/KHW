@@ -2,10 +2,11 @@
 
 TLS_C="FR"
 TLS_L="Neuilly-Plaisance"
-TLS_OU="CA"
+TLS_OU="Kubernetes The Hard Way"
 TLS_ST="Seine-Saint-Denis"
-declare -a SLAVES_IPS=("10.98.0.20" "10.98.0.21" "10.98.0.22")
+declare -a SLAVES_IPS=("10.98.0.31" "10.98.0.32" "10.98.0.33")
 declare -a SLAVES_HOSTNAMES=("slave01" "slave02" "slave03")
+EXTERNAL_IP=$(curl -s -4 https://ifconfig.co)
 
 mkdir -p pki/{admin,api,ca,clients,controller,proxy,scheduler,service-account}
 
@@ -62,7 +63,7 @@ cat > pki/admin/admin-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes",
+      "O": "kubernetes:masters",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -95,7 +96,7 @@ for i in {0..2}; do
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes",
+      "O": "kubernetes:nodes",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -107,7 +108,7 @@ cfssl gencert \
   -ca=pki/ca/ca.pem \
   -ca-key=pki/ca/ca-key.pem \
   -config=pki/ca/ca-config.json \
-  -hostname=${SLAVES_HOSTNAMES[$i]},${SLAVES_IPS[$i]} \
+  -hostname=${SLAVES_HOSTNAMES[$i]},${SLAVES_IPS[$i]},${EXTERNAL_IP} \
   -profile=kubernetes \
   pki/clients/${SLAVES_HOSTNAMES[$i]}-csr.json | cfssljson -bare pki/clients/${SLAVES_HOSTNAMES[$i]}
 done
@@ -124,7 +125,7 @@ cat > pki/controller/kube-controller-manager-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes",
+      "O": "kubernetes:kube-controller-manager",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -152,7 +153,7 @@ cat > pki/proxy/kube-proxy-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes",
+      "O": "kubernetes:kube-proxy",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -168,7 +169,7 @@ cfssl gencert \
   pki/proxy/kube-proxy-csr.json | cfssljson -bare pki/proxy/kube-proxy
 
 
-#Generation of the scheduler certifcat
+#Generation of the scheduler certificat
 cat > pki/scheduler/kube-scheduler-csr.json <<EOF
 {
   "CN": "system:kube-scheduler",
@@ -180,7 +181,7 @@ cat > pki/scheduler/kube-scheduler-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes",
+      "O": "kubernetes:kube-scheduler",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -205,7 +206,7 @@ cat > pki/api/kubernetes-csr.json <<EOF
   },
   "names": [
     {
-      "C": "${TLS_C}",r
+      "C": "${TLS_C}",
       "L": "${TLS_L}",
       "O": "kubernetes",
       "OU": "${TLS_OU}",
@@ -219,7 +220,7 @@ cfssl gencert \
   -ca=pki/ca/ca.pem \
   -ca-key=pki/ca/ca-key.pem \
   -config=pki/ca/ca-config.json \
-  -hostname=10.32.0.1,10.98.0.12,10.98.0.29,10.98.0.30,10.98.0.19,127.0.0.1,kubernetes.default \
+  -hostname=10.32.0.1,10.98.0.12,10.98.0.37,10.98.0.38,10.98.0.19,127.0.0.1,kubernetes.default \
   -profile=kubernetes \
   pki/api/kubernetes-csr.json | cfssljson -bare pki/api/kubernetes
 

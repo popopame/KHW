@@ -49,12 +49,13 @@ cp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \
 
 After that , we can cat this input into the service file.
 Don't forget to modify the ```--etcd-servers=``` server line , to correspond to yours.
-For me , the etcd adresse is : ```10.98.0.16,10.98.0.17.10.98.0.18```
+For me , the etcd adresse is : ```10.98.0.12,10.98.0.37,10.98.0.38```
 ```bash
 cat <<EOF | sudo tee /etc/systemd/system/kube-apiserver.service
 [Unit]
 Description=Kubernetes API Server
-Documentation=https://github.com/kubernetes/kubernetes[Service]
+Documentation=https://github.com/kubernetes/kubernetes
+[Service]
 ExecStart=/usr/bin/kube-apiserver \\
   --advertise-address=${INTERNAL_IP} \\
   --allow-privileged=true \\
@@ -71,7 +72,7 @@ ExecStart=/usr/bin/kube-apiserver \\
   --etcd-cafile=/var/lib/kubernetes/ca.pem \\
   --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \\
   --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
-  --etcd-servers=https://10.98.0.16:2379,https://10.98.0.17:2379,https://192.168.0.18:2379 \\
+  --etcd-servers=https://10.98.0.12:2379,https://10.98.0.37:2379,https://192.168.0.38:2379 \\
   --event-ttl=1h \\
   --experimental-encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
   --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\
@@ -86,7 +87,8 @@ ExecStart=/usr/bin/kube-apiserver \\
   --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \\
   --v=2
 Restart=on-failure
-RestartSec=5[Install]
+RestartSec=5
+[Install]
 WantedBy=multi-user.target
 EOF
 
@@ -192,7 +194,9 @@ yum -y install  nginx
 cat > kubernetes.default.svc.cluster.local <<EOF
 server {
   listen      80;
-  server_name kubernetes.default.svc.cluster.local;location /healthz {
+  server_name kubernetes.default.svc.cluster.local;
+
+  location /healthz {
      proxy_pass                    https://127.0.0.1:6443/healthz;
      proxy_ssl_trusted_certificate /var/lib/kubernetes/ca.pem;
   }
@@ -206,7 +210,7 @@ rm /etc/nginx/sites-enabled/default
 
 mv kubernetes.default.svc.cluster.local /etc/nginx/sites-available/kubernetes.default.svc.cluster.local
 
-ln -s /etc/nginx/sites-available/kubernetes.default.svc.cluster.local /etc/nginx/sites-enabled/sudo
+ln -s /etc/nginx/sites-available/kubernetes.default.svc.cluster.local /etc/nginx/sites-enabled/
 
 systemctl restart nginx
 systemctl enable nginx
