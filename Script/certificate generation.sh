@@ -4,7 +4,7 @@ TLS_C="FR"
 TLS_L="Neuilly-Plaisance"
 TLS_OU="Kubernetes The Hard Way"
 TLS_ST="Seine-Saint-Denis"
-declare -a SLAVES_IPS=("10.98.0.31" "10.98.0.32" "10.98.0.33")
+declare -a SLAVES_IPS=("10.98.0.104" "10.98.0.105" "10.98.0.106")
 declare -a SLAVES_HOSTNAMES=("slave01" "slave02" "slave03")
 EXTERNAL_IP=$(curl -s -4 https://ifconfig.co)
 
@@ -27,6 +27,7 @@ cat > pki/ca/ca-config.json <<EOF
     }
   }
 }
+EOF
 EOF
 
 cat > pki/ca/ca-csr.json <<EOF
@@ -54,7 +55,7 @@ cfssl gencert -initca pki/ca/ca-csr.json | cfssljson -bare pki/ca/ca
 #Below we will generate the Admin certificate
 cat > pki/admin/admin-csr.json <<EOF
 {
-  "CN": "system:admin",
+  "CN": "admin",
   "key": {
     "algo": "rsa",
     "size": 2048
@@ -63,7 +64,7 @@ cat > pki/admin/admin-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes:masters",
+      "O": "system:masters",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -96,7 +97,7 @@ for i in {0..2}; do
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes:nodes",
+      "O": "system:nodes",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -125,7 +126,7 @@ cat > pki/controller/kube-controller-manager-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes:kube-controller-manager",
+      "O": "system:kube-controller-manager",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -153,7 +154,7 @@ cat > pki/proxy/kube-proxy-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes:kube-proxy",
+      "O": "system:kube-proxy",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -181,7 +182,7 @@ cat > pki/scheduler/kube-scheduler-csr.json <<EOF
     {
       "C": "${TLS_C}",
       "L": "${TLS_L}",
-      "O": "kubernetes:kube-scheduler",
+      "O": "system:kube-scheduler",
       "OU": "${TLS_OU}",
       "ST": "${TLS_ST}"
     }
@@ -220,7 +221,7 @@ cfssl gencert \
   -ca=pki/ca/ca.pem \
   -ca-key=pki/ca/ca-key.pem \
   -config=pki/ca/ca-config.json \
-  -hostname=10.32.0.1,10.98.0.12,10.98.0.37,10.98.0.38,10.98.0.19,127.0.0.1,kubernetes.default \
+  -hostname=10.32.0.1,10.98.0.100,10.98.0.101,10.98.0.102,10.98.0.103,127.0.0.1,kubernetes.default \
   -profile=kubernetes \
   pki/api/kubernetes-csr.json | cfssljson -bare pki/api/kubernetes
 

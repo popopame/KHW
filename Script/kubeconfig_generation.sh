@@ -1,8 +1,8 @@
 #Declaration of the Variables needed in this script , you need to modify these so that they correspond to your infrastrucre
 
-declare -a SLAVES_IPS=("10.98.0.31" "10.98.0.32" "10.98.0.33")
+declare -a SLAVES_IPS=("10.98.0.104" "10.98.0.105" "10.98.0.106")
 declare -a SLAVES_HOSTNAMES=("slave01" "slave02" "slave03")
-KUBERNETES_PUBLIC_IP=("10.98.0.19")
+KUBERNETES_PUBLIC_IP=("10.98.0.100")
 
 
 #Create a folder to put the configuration file , run this script in the KHW folder

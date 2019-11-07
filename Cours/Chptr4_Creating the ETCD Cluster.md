@@ -14,7 +14,7 @@ First we will download and install the etcd program on the server.
 Unpack it and move it on the bin folder , so that we can call him with the CLI
 
 ```bash
-wget --secure-protocol=auto "https://github.com/coreos/etcd/releases/download/v3.3.9/etcd-v3.3.9-linux-amd64.tar.gz"
+wget --secure-protocol=auto "https://github.com/etcd-io/etcd/releases/download/v3.4.2/etcd-v3.4.2-linux-amd64.tar.gz"
 
 tar -xvf etcd-v3.3.9-linux-amd64.tar.gz
 sudo mv etcd-v3.3.9-linux-amd64/etcd* /usr/bin/
@@ -32,10 +32,10 @@ In this we will put all our configuration.
 
 First , create two environement variables needed for this file:
 
-**Note :Modify the eth0 by the network card name**
+**Note :Modify the ens18 by the network card name**
 
 ```bash
-INTERNAL_IP=$(ip addr show eth0 | grep -Po 'inet \K[\d.]+') #THIS controller's internal IP
+INTERNAL_IP=$(ip addr show ens18 | grep -Po 'inet \K[\d.]+') #THIS controller's internal IP
 ETCD_NAME=$(hostname -s)
 ```
 
@@ -64,7 +64,7 @@ ExecStart=/usr/bin/etcd \\
   --listen-client-urls https://${INTERNAL_IP}:2379,https://127.0.0.1:2379 \\
   --advertise-client-urls https://${INTERNAL_IP}:2379 \\
   --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster master01=https://10.98.0.12:2380,master02=https://10.98.0.37:2380,master03=https://10.98.0.38:2380 \\
+  --initial-cluster master01=https://10.98.0.101:2380,master02=https://10.98.0.102:2380,master03=https://10.98.0.103:2380 \\
   --initial-cluster-state new \\
   --data-dir=/var/lib/etcd
 Restart=on-failure

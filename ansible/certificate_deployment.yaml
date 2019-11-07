@@ -8,8 +8,9 @@
 #Installation of needed packet and update of the distant host
   tasks:
    - name: "Installation of 3 packet that will help us later"
-     yum:
+     apt:
        name: "{{ packages }}"
+       force_apt_get: yes
      vars:
        packages:
          - net-tools
@@ -17,19 +18,19 @@
          - socat
          - wget
          - vim
-         - epel-release
    - name: "Update of the System"
-     yum:
+     apt:
        name: "*"
        state: latest
        update_cache: yes
+       force_apt_get: test
 
 #Creation of user/s referenced in "users" var , and creation of their ssh key
 
    - name: "Create user accounts and add users to admin groups"
      user:
        name: "{{ item }}"
-       groups: "wheel"
+       groups: "root"
      with_items: "{{ users }}"
    - name: "Add authorized key"
      authorized_key:
@@ -41,8 +42,8 @@
      lineinfile:
        dest: "/etc/sudoers"
        state: "present"
-       regexp: "^%wheel"
-       line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+       regexp: "^%root"
+       line: "%root ALL=(ALL) NOPASSWD: ALL"
 
 #Deploiement of the certificate and the key on the hosts
 - hosts: kube-masters
@@ -113,3 +114,22 @@
       copy:
            src: "/KHW/pki/clients/slave03.pem"
            dest: "/"
+
+- hosts: kube-masters
+  tasks:
+     - name: "Downloading the Kubectl , Kube-apiserver , Kube-scheduler and Kube-controller binaries , this will take a while depending on your connection (500 MO download)"
+       get_url:
+            url: "{{links}}"
+            dest: "/"
+       vars:
+         links:
+          -https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-apiserver
+          -https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-controller-manager
+          -https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-scheduler
+          -https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kubect
+
+
+     - name: "Downloading the etcd binaries"
+       get_url:
+            url: "https://github.com/etcd-io/etcd/releases/download/v3.4.2/etcd-v3.4.2-linux-amd64.tar.gz"
+            dest: "/"

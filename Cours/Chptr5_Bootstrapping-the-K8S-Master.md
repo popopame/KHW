@@ -34,7 +34,7 @@ First we create a folder that we will use in the following chapter , and we copy
 Don't forger to re-type the following command if you restarted your server between the Chapter 3 and 4.
 
 ```bash
-INTERNAL_IP=$(ip addr show eth0 | grep -Po 'inet \K[\d.]+')
+INTERNAL_IP=$(ip addr show ens18 | grep -Po 'inet \K[\d.]+')
  ```
 Then :
 
@@ -49,7 +49,7 @@ cp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \
 
 After that , we can cat this input into the service file.
 Don't forget to modify the ```--etcd-servers=``` server line , to correspond to yours.
-For me , the etcd adresse is : ```10.98.0.12,10.98.0.37,10.98.0.38```
+For me , the etcd adresse is : ```10.98.0.101,10.98.0.102,10.98.0.103```
 ```bash
 cat <<EOF | sudo tee /etc/systemd/system/kube-apiserver.service
 [Unit]
@@ -72,11 +72,10 @@ ExecStart=/usr/bin/kube-apiserver \\
   --etcd-cafile=/var/lib/kubernetes/ca.pem \\
   --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \\
   --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
-  --etcd-servers=https://10.98.0.12:2379,https://10.98.0.37:2379,https://192.168.0.38:2379 \\
+  --etcd-servers=https://10.98.0.101:2379,https://10.98.0.102:2379,https://10.98.0.103:2379 \\
   --event-ttl=1h \\
   --experimental-encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
-  --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\
-  --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \\
+  --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\  --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \\
   --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem \\
   --kubelet-https=true \\
   --runtime-config=api/all \\
@@ -108,7 +107,8 @@ The we can configure the service file
 cat <<EOF | sudo tee /etc/systemd/system/kube-controller-manager.service
 [Unit]
 Description=Kubernetes Controller Manager
-Documentation=https://github.com/kubernetes/kubernetes[Service]
+Documentation=https://github.com/kubernetes/kubernetes
+[Service]
 ExecStart=/usr/bin/kube-controller-manager \\
   --bind-address=0.0.0.0 \\
   --cluster-cidr=10.200.0.0/16 \\
@@ -126,7 +126,8 @@ ExecStart=/usr/bin/kube-controller-manager \\
   --use-service-account-credentials=true \\
   --v=2
 Restart=on-failure
-RestartSec=5[Install]
+RestartSec=5
+[Install]
 WantedBy=multi-user.target
 EOF
 ```
