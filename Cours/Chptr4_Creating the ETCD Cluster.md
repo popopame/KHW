@@ -1,11 +1,34 @@
-### 3 ETCD
+### 4 ETCD
 
-#### 3.1 What is ETCD
+#### 4.1 What is ETCD
 
-#### 3.2 ETCD in Kubernetes
+ETCD is a Distributed Key-Value Data-Store.
+Wich mean that it is , in it's core a Database , but a Database that is intended to be deployed and accessed on a distributed system.
+Understand a System that is deployed on more than one host.
 
+The Database host Key-Value data (example foo: bar)
 
-#### 3.3 Configuring etcd on Master nodes
+It's as simple as that !
+#### 4.2 ETCD in Kubernetes
+
+Since Kubernetes is by design a Distributed System (It can be ran on different hosts).
+It needs a Distributed Database , that's were ETCD rage into the battle
+
+Kubernetes uses etcd as a key-value database store. It stores the configuration of the Kubernetes cluster in etcd.
+
+It also stores the actual state of the system and the desired state of the system in etcd.
+
+It then uses etcd’s watch functionality to monitor changes to either of these two things. If they diverge, Kubernetes makes changes to reconcile the actual state and the desired state.
+
+#### 4.3 What we will do in this Chapter
+
+We will download the etcd binaries from the Official github.
+
+After moving the etcd to the right directory , we will move the certificates to a directory to a folder that the binary can access.
+
+And , to finish , we will create the service file that will be executed when you launch the etcd program.
+
+#### 4.4 Configuring etcd on Master nodes
 
 **All Commands bellow , unless specified otherwise , must be executed on all master nodes**
 *I recomend using tmux for this*
@@ -48,6 +71,7 @@ cat <<EOF | sudo tee /etc/systemd/system/etcd.service
 [Unit]
 Description=etcd
 Documentation=https://github.com/coreos
+
 [Service]
 ExecStart=/usr/bin/etcd \\
   --name ${ETCD_NAME} \\
@@ -69,6 +93,7 @@ ExecStart=/usr/bin/etcd \\
   --data-dir=/var/lib/etcd
 Restart=on-failure
 RestartSec=5
+
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -95,9 +120,9 @@ sudo ETCDCTL_API=3 etcdctl member list \
 
 
 #You should have an output that look like This
-1748aef7d885aa5e, started, master03, https://10.98.0.18:2380, https://10.98.0.18:2379
-aaaab241db54789c, started, master02, https://10.98.0.17:2380, https://10.98.0.17:2379
-e15ab1211a4b4e4e, started, master01, https://10.98.0.16:2380, https://10.98.0.16:2379
+1748aef7d885aa5e, started, master03, https://10.98.0.18:2380, https://10.98.0.103:2379
+aaaab241db54789c, started, master02, https://10.98.0.17:2380, https://10.98.0.102:2379
+e15ab1211a4b4e4e, started, master01, https://10.98.0.16:2380, https://10.98.0.101:2379
 ```
 
 

@@ -23,7 +23,7 @@
        name: "*"
        state: latest
        update_cache: yes
-       force_apt_get: test
+       force_apt_get: yes
 
 #Creation of user/s referenced in "users" var , and creation of their ssh key
 
@@ -70,6 +70,11 @@
        copy:
             src: "/KHW/pki/service-account/service-account-key.pem"
             dest: "/"
+     - name: "Copy the service account certificate"
+       copy:
+            src: "/KHW/pki/service-account/service-account.pem"
+            dest: "/"
+
      - name: "Copy the service account certificate"
        copy:
             src: "/KHW/pki/service-account/service-account.pem"

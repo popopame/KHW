@@ -60,7 +60,7 @@ Here is a Schema to better understand how it work:
 **On the worker nodes**
 
 As said before the worked node are the machines that run your contenairized apps , the components that do this are:
-* **Container Runtime** : The Container Engine that will run you container (Docker , rkt , CrI-O, ect...). You can choose any CRI compliant Container Runtime that suit your need
+* **Container Runtime** : The Container Engine that will run you container (Docker ,containerd, rkt , CrI-O, ect...). You can choose any CRI compliant Container Runtime that suit your need
 * **Kubelet** Wich will talk to the API server and manage the container on the worker node
 * **Kubernetes Service Proxy or kube-proxy**: wich will do the load-balancing between the application components/
 
@@ -79,7 +79,18 @@ You can for example , run only one master and one Slave.
 **Note: If you change the number of deployed instances , don't forget to adapt all the thing we will do on this course to correspond to your infra**
 
 
-#### 1.3 Setting up your compute instance and tools
+#### 1.3 Setting up your compute instance
+
+I will setup everything on the Proxmox server I have , I juste created two template (Slave and Master Template).
+
+And I will clone them to deploy my architecture.  Once the VM created , I will copy the MAC adress of the instance and set a static IP from my OpenSense server to fix them.
+
+
+I also provided a bash script to deploy the architecture via KVM , here is a little tutorial on how to do so:
+
+
+
+#### 1.4 Setting the tools used
 
 
 First we download the program , the two cfssl packet come from the Kubernetes the Hard Way github

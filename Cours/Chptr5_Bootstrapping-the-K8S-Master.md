@@ -1,5 +1,9 @@
 #### 4.1  What is the Kubernetes Control Planes? How does it work?
 
+THe kubebernetes control plane is all the components that will be installed on the master node : kube-scheduler , kube-API server and the Kube-controller-manager.
+
+Together they manage the workload that will be launched on the cluster.
+
 #### 4.2 Download the files
 
 **NOTE: As usual , all commands must be done on all 3 clusters**
@@ -10,11 +14,11 @@ First , we need to download  the binaries needed for the Chapter , once download
 ```bash
 mkdir -p /etc/kubernetes/config
 
-wget --secure-protocol=auto\
-  "https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-apiserver" \
-  "https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-controller-manager" \
-  "https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-scheduler" \
-  "https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kubectl"
+wget --secure-protocol=auto \
+"https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kube-apiserver" \
+"https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kube-controller-manager" \
+"https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kube-scheduler" \
+"https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kubectl"
 
   chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
 
@@ -55,6 +59,7 @@ cat <<EOF | sudo tee /etc/systemd/system/kube-apiserver.service
 [Unit]
 Description=Kubernetes API Server
 Documentation=https://github.com/kubernetes/kubernetes
+
 [Service]
 ExecStart=/usr/bin/kube-apiserver \\
   --advertise-address=${INTERNAL_IP} \\
@@ -67,15 +72,15 @@ ExecStart=/usr/bin/kube-apiserver \\
   --authorization-mode=Node,RBAC \\
   --bind-address=0.0.0.0 \\
   --client-ca-file=/var/lib/kubernetes/ca.pem \\
-  --enable-admission-plugins=Initializers,NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
-  --enable-swagger-ui=true \\
+  --enable-admission-plugins=NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
   --etcd-cafile=/var/lib/kubernetes/ca.pem \\
   --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \\
   --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
   --etcd-servers=https://10.98.0.101:2379,https://10.98.0.102:2379,https://10.98.0.103:2379 \\
   --event-ttl=1h \\
-  --experimental-encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
-  --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\  --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \\
+  --encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
+  --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\
+  --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \\
   --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem \\
   --kubelet-https=true \\
   --runtime-config=api/all \\
@@ -87,10 +92,10 @@ ExecStart=/usr/bin/kube-apiserver \\
   --v=2
 Restart=on-failure
 RestartSec=5
+
 [Install]
 WantedBy=multi-user.target
 EOF
-
 ```
 
 #### 4.4 Configuring the Kubernetes Controller Manager
@@ -102,19 +107,22 @@ cp /kube-controller-manager.kubeconfig /var/lib/kubernetes/
 ```
 
 The we can configure the service file
+**Note If you change the cluster name in the service file , IT MUST be the same as the one setted in the kubeconfig , otherwise you will encounter error later on**
+
 
 ```bash
 cat <<EOF | sudo tee /etc/systemd/system/kube-controller-manager.service
 [Unit]
 Description=Kubernetes Controller Manager
 Documentation=https://github.com/kubernetes/kubernetes
+
 [Service]
 ExecStart=/usr/bin/kube-controller-manager \\
-  --bind-address=0.0.0.0 \\
+  --address=0.0.0.0 \\
   --cluster-cidr=10.200.0.0/16 \\
   --allocate-node-cidrs=true \\
   --node-cidr-mask-size=24 \\
-  --cluster-name=kubernetes \\
+  --cluster-name=KHW-cluster  \\
   --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
   --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \\
   --kubeconfig=/var/lib/kubernetes/kube-controller-manager.kubeconfig \\
@@ -127,6 +135,7 @@ ExecStart=/usr/bin/kube-controller-manager \\
   --v=2
 Restart=on-failure
 RestartSec=5
+
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -181,6 +190,25 @@ sudo systemctl daemon-reload
 sudo systemctl enable kube-apiserver kube-controller-manager kube-scheduler
 sudo systemctl start kube-apiserver kube-controller-manager kube-scheduler
 ```
+
+
+To verify that everything is working you can query th components:
+```bash
+kubectl get componentstatuses --kubeconfig admin.kubeconfig
+```
+
+You should have this result:
+```bash
+controller-manager   Healthy   ok
+scheduler            Healthy   ok
+etcd-2               Healthy   {"health": "true"}
+etcd-0               Healthy   {"health": "true"}
+etcd-1               Healthy   {"health": "true"}
+```
+
+If one of the components is not responding , check the process (with a systemctl status [Process Name]) , see what's not working and try to debug from here.
+
+
 #### 4.6 Enabling HTTP Health Check
 
 The Load Balancer will do Health Check on our instances , they will be done on the port 6443.
@@ -190,7 +218,7 @@ We will use Nginx (but you can use whatever solution you want)
 First we will install it , after that , we are going to delete the default config file , so that we can set our own.
 
 ```bash
-yum -y install  nginx
+apt-get -y install  nginx
 
 cat > kubernetes.default.svc.cluster.local <<EOF
 server {
@@ -217,7 +245,68 @@ systemctl restart nginx
 systemctl enable nginx
 ```
 
+Test if the Proxy is working with this command:
+```bash
+curl -H "Host: kubernetes.default.svc.cluster.local" -i http://127.0.0.1/healthz
+```
+You should have this in return:
+```bash
+HTTP/1.1 200 OK
+Server: nginx/1.14.0 (Ubuntu)
+Date: Sat, 14 Sep 2019 18:34:11 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 2
+Connection: keep-alive
+X-Content-Type-Options: nosniff
 
+ok
+```
+
+If you do not have this in return , or is you have an error (403,4O4 , or another).
+Go to the log file of the nginx procy (locate in ```bash /var/log\nginx```)
 
 
 #### 4.7 RBAC
+
+```bash
+cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+  name: system:kube-apiserver-to-kubelet
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/proxy
+      - nodes/stats
+      - nodes/log
+      - nodes/spec
+      - nodes/metrics
+    verbs:
+      - "*"
+EOF
+```
+
+```bash
+cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: system:kube-apiserver
+  namespace: ""
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:kube-apiserver-to-kubelet
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: kubernetes
+EOF
+
+```

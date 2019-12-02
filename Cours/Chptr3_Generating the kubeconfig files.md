@@ -1,14 +1,39 @@
-#Declaration of the Variables needed in this script , you need to modify these so that they correspond to your infrastrucre
+### 3 Generating the kubeconfig files
 
+#### 3.1 What is a kubeconfig file
+
+This sections will be very simple :
+
+A kubeconfig file , is the file that contain some configurations that will be applied on the cluster.
+
+They can be used to apply changes/configration to a components of the cluster.
+Or just apply changes to an user or changes policies.
+
+***I also gave you a bash script that will generate all the kubeconfig file . I recommand to do all the config gile by hand at least one time.
+So you can better understand how this work and what we will do , but if you decide to start over , you can use the script.***
+
+#### 3.5 What we will do in this Chapter
+
+We will generate the kubeconfig that will be used to configure the components
+
+#### 3.4 Configuring etcd on Master nodes
+
+First wer declare the variables that we will use (adapt these to your nodes)
+```bash
 declare -a SLAVES_IPS=("10.98.0.104" "10.98.0.105" "10.98.0.106")
 declare -a SLAVES_HOSTNAMES=("slave01" "slave02" "slave03")
 KUBERNETES_PUBLIC_IP=("10.98.0.100")
 
+```
 
-#Create a folder to put the configuration file , run this script in the KHW folder
+Then create the folder that we will use:
+```bash
 mkdir configs
 mkdir -p configs/{admin,clients,controller,proxy,scheduler,encrypt}
-#Generate the Kubeconfig file for each slave node
+```
+finally we create all the kubeconfig file , for each components
+
+```bash
 
 for instance in ${SLAVES_HOSTNAMES[@]}; do
   echo Creation of the Kubeconfig for ${instance}
@@ -125,12 +150,22 @@ kubectl config set-context default \
 kubectl config use-context default --kubeconfig=configs/admin/admin.kubeconfig
 
 
-#Generation of the Encryption config file
-#To generate the encryption key , we take a random string of 32 characters
+```
 
-echo Creattion of the encrytpion file
+
+Finally we need to generarte the encryption file , wich is a file containing a random string.
+It will be used to encrypt data that will be encrypted at rest.
+
+To obtain a randomstring we will use the following command:
+```bash
 
 ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
+
+```
+We then use the varable we just created on a config file. (wich is not a Kubeconfig but a Yaml file)
+
+```bash
+
 
 cat > configs/encrypt/encryption-config.yaml <<EOF
 kind: EncryptionConfig
@@ -145,3 +180,4 @@ resources:
               secret: ${ENCRYPTION_KEY}
       - identity: {}
 EOF
+```
