@@ -2,14 +2,14 @@
 
 THe kubebernetes control plane is all the components that will be installed on the master node : kube-scheduler , kube-API server and the Kube-controller-manager.
 
-Together they manage the workload that will be launched on the cluster.
+Together they manage the workload that will be launched on the cluster. Theses components are the "brains" of the cluster , they whill schedule the workload , and manage the workload (ex: Maker sure that every deployement has the replicas it needs).
 
 #### 4.2 Download the files
 
 **NOTE: As usual , all commands must be done on all 3 clusters**
 
 
-First , we need to download  the binaries needed for the Chapter , once downloaded , put them in the ```/usr/bin``` folder , so we can execute them.
+First , we need to download  the binaries needed for the Chapter , once downloaded , put them in the ```/usr/local/bin``` folder , so we can execute them.
 
 ```bash
 mkdir -p /etc/kubernetes/config
@@ -22,7 +22,7 @@ wget --secure-protocol=auto \
 
   chmod +x kube-apiserver kube-controller-manager kube-scheduler kubectl
 
-  mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/bin/
+  mv kube-apiserver kube-controller-manager kube-scheduler kubectl /usr/local/bin/
 
 
 ```
@@ -61,7 +61,7 @@ Description=Kubernetes API Server
 Documentation=https://github.com/kubernetes/kubernetes
 
 [Service]
-ExecStart=/usr/bin/kube-apiserver \\
+ExecStart=/usr/local/bin/kube-apiserver \\
   --advertise-address=${INTERNAL_IP} \\
   --allow-privileged=true \\
   --apiserver-count=3 \\
@@ -117,11 +117,9 @@ Description=Kubernetes Controller Manager
 Documentation=https://github.com/kubernetes/kubernetes
 
 [Service]
-ExecStart=/usr/bin/kube-controller-manager \\
+ExecStart=/usr/local/bin/kube-controller-manager \\
   --address=0.0.0.0 \\
   --cluster-cidr=10.200.0.0/16 \\
-  --allocate-node-cidrs=true \\
-  --node-cidr-mask-size=24 \\
   --cluster-name=KHW-cluster  \\
   --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
   --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \\
@@ -168,7 +166,7 @@ Description=Kubernetes Scheduler
 Documentation=https://github.com/kubernetes/kubernetes
 
 [Service]
-ExecStart=/usr/bin/kube-scheduler \\
+ExecStart=/usr/local/bin/kube-scheduler \\
   --config=/etc/kubernetes/config/kube-scheduler.yaml \\
   --v=2
 Restart=on-failure
@@ -268,6 +266,18 @@ Go to the log file of the nginx procy (locate in ```bash /var/log\nginx```)
 
 #### 4.7 RBAC
 
+##### 4.7.1 What is RBAC
+
+RBAC stands for Role Based Access Controller
+
+RBAC is used in Kubernetes to control acces and right.
+
+What we are going to do bellow is to set RBAC for Kubernetes API.
+
+By Default the API does not Have access to the cluster.
+
+##### 4.7.2 Deploy RBAC
+
 ```bash
 cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -308,5 +318,4 @@ subjects:
     kind: User
     name: kubernetes
 EOF
-
 ```

@@ -3,7 +3,7 @@
 
 In this course , we will deploy a Kubernetes Cluster "The Hard Way" on baremetal server , wich mean that we will do everything manually (With script and ansible playbook , to help you do boring task if you want , **but** we will do it mainly with our little hands !).
 We will not use heavy-duty tools to deploy an ready-to-use Cluster (like Kops, Kubespray,Minikube, ect...).
-
+**PENSER A METTRE CSHEMA**
 Why do this you ask? To Better Understand How Kubernetes Work , and how all of his components interact with each others.
 This will be a good exercice if you are preparing the CKA certification , or if you just want to get your hands dirty in Kubernetes.
 

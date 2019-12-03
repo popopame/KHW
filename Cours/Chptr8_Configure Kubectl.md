@@ -12,7 +12,7 @@ We will use the admin profile.
 kubectl config set-cluster KHW-cluster \
         --certificate-authority=pki/ca/ca.pem \
         --embed-certs=true \
-        --server=https://${KUBERNETES_PUBLIC_IP}:6443 \
+        --server=https://10.98.0.100:6443 \
         --kubeconfig=configs/admin/admin-remote.kubeconfig
 
 

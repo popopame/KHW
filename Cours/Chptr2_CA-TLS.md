@@ -10,15 +10,15 @@ We will use the cfssl , wich is a toolboox created by cloudfare to generate PKI.
 
 #### 2.1 What are CA/TLS and why do we need them ?
 
+A **Certificate** is used to confirm an **identities**
 In this section we are going to provide **identities** to our kubernetes services.
 
-In IT an Identities is Provided by a CA , a **Certificate Identity**
+In IT an Identities is Provided by a **Certificate** and this certificate is validated by  **Certificate Identity**
 
-This CA will be used to signe x.509 compliant **Certificate**.
+So we will generate a CA (Certificate Authority) and this CA will be used to sign x.509 compliant **Certificate**.
 
-These Certificate , will be used to confirme the identity of the entity tha hold it.
+These Certificate , will be used to confirm the identity of the entity that hold it.
 
-Here is a little explanation on how all of this work.
 
 
 #### 2.2 CA/TLS in a Kubernetes cluster
@@ -29,6 +29,14 @@ Remember this schema ?
 
 Well to put it simply , Certificate will be used by all these component to securely communicate together.
 The certificates will be used to encrypt the data being exchanged and the CA will be used to validate the identity of the the components.
+
+We will generate the following Certificates:
+
+* **Component/Client Certificate** : These Certs provide authentification for users in the K8s cluster : kube-controller, kube-proxy, kube-scheduler , kubelet and Admin
+* **Service account Key** : K8s use a certificate to sign service accoun token
+* **Kubernetes API certificate** : Certificate used by the Kubernetes api
+
+
 
 **Note: I created a Script to help generate all the Certificates in a faster manner , the most important thing is to UNDERSTAND  a command.
 If you do not use the script , you need to declare all the varialble beforehand**
@@ -309,3 +317,53 @@ We will now generate a PKI infrastructure , and create all the certificate for
 the kubernetes cluster.
 
 ```ansible-playbook -i inventory/hosts.yml -u root -k deploiement.yaml```
+
+If you want to deploy them by hand , you can do it with the scp command :
+```bash
+
+for instance in slave01 slave02 slave03; do
+  scp pki/ca/ca.pem pki/clients/${instance}-key.pem pki/clients/${instance}.pem ${instance}:~/
+done
+
+for instance in master01 master02 master03; do
+  scp pki/ca/ca.pem pki/ca/ca-key.pem pki/api/kubernetes-key.pem pki/api/kubernetes.pem pki/service-account/service-account-key.pem pki/service-account/service-account.pem ${instance}:~/
+done
+```
+
+#### 2.6 Encryption key
+
+##### 2.6.1 What is an Encryption key
+
+kubernetes support Data Encryption at rest , this mean that all secret managed by K8s , will be encrypted and not written in plain text.
+
+This feature , is more than needed , but in orderd to encrypt Data At rest , K8s  will need an encryption Key.
+
+We will generate the Encryption key as below:
+
+```bash
+ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
+
+cat > encryption-config.yaml << EOF
+kind: EncryptionConfig
+apiVersion: v1
+resources:
+  - resources:
+      - secrets
+    providers:
+      - aescbc:
+          keys:
+            - name: key1
+              secret: ${ENCRYPTION_KEY}
+      - identity: {}
+EOF
+
+```
+
+Once this is done , You can use the ansible Playbook to deply the encryption key , or secure copy the encryption key on the master node:
+
+```bash
+scp ./encryption-config.yaml master01
+scp ./encryption-config.yaml master02
+scp ./encryption-config.yaml master03
+
+```

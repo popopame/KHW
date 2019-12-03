@@ -3,7 +3,7 @@
 #### 3.1 What is a kubeconfig file
 
 This sections will be very simple :
-
+**PENSER A METTRE CSHEMA**
 A kubeconfig file , is the file that contain some configurations that will be applied on the cluster.
 
 They can be used to apply changes/configration to a components of the cluster.

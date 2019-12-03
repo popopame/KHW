@@ -3,22 +3,25 @@
 #### 4.1 What is ETCD
 
 ETCD is a Distributed Key-Value Data-Store.
-Wich mean that it is , in it's core a Database , but a Database that is intended to be deployed and accessed on a distributed system.
+Wich mean that it is , in its core a Database , but a Database that is intended to be deployed and accessed on a distributed system.
 Understand a System that is deployed on more than one host.
 
 The Database host Key-Value data (example foo: bar)
 
+So , etcd provide a way to store data on a cluster of machine and make sure that the data is synchronized on all member of the cluster.
+
 It's as simple as that !
 #### 4.2 ETCD in Kubernetes
 
-Since Kubernetes is by design a Distributed System (It can be ran on different hosts).
-It needs a Distributed Database , that's were ETCD rage into the battle
+Since Kubernetes is by design a Distributed System (It can be ran on multiple servers.)
+It needs a Distributed Database , that's were ETCD storm into the battle
 
 Kubernetes uses etcd as a key-value database store. It stores the configuration of the Kubernetes cluster in etcd.
 
 It also stores the actual state of the system and the desired state of the system in etcd.
 
 It then uses etcd’s watch functionality to monitor changes to either of these two things. If they diverge, Kubernetes makes changes to reconcile the actual state and the desired state.
+**PENSER A METTRE CSHEMA**
 
 #### 4.3 What we will do in this Chapter
 
@@ -37,10 +40,10 @@ First we will download and install the etcd program on the server.
 Unpack it and move it on the bin folder , so that we can call him with the CLI
 
 ```bash
-wget --secure-protocol=auto "https://github.com/etcd-io/etcd/releases/download/v3.4.2/etcd-v3.4.2-linux-amd64.tar.gz"
+wget -q --show-progress --https-only --timestamping "https://github.com/etcd-io/etcd/releases/download/v3.4.2/etcd-v3.4.2-linux-amd64.tar.gz"
 
 tar -xvf etcd-v3.3.9-linux-amd64.tar.gz
-sudo mv etcd-v3.3.9-linux-amd64/etcd* /usr/bin/
+sudo mv etcd-v3.3.9-linux-amd64/etcd* /usr/local/bin/
 
 ```
 
@@ -73,7 +76,7 @@ Description=etcd
 Documentation=https://github.com/coreos
 
 [Service]
-ExecStart=/usr/bin/etcd \\
+ExecStart=/usr/local/bin/etcd \\
   --name ${ETCD_NAME} \\
   --cert-file=/etc/etcd/kubernetes.pem \\
   --key-file=/etc/etcd/kubernetes-key.pem \\

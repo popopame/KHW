@@ -1,8 +1,20 @@
+### 7 Configuring the Worker Nodes
 
+#### 7.1 What is a Kubernetes Worker NODE
 
-#### 7.1 What are we going to do in this course part
+A Kubernetes Worker node are responsible of the "workload"
+They will launch the container applications.
 
-#### 7.2 Download the binaries
+Theses nodes have the services necessary to run the apps and will be managed by the master node.
+
+We are going to install theses components:
+* **kubelet** Control each worker node , they will provide the API on wich the control plane  will interact
+* **kube-proxy**: Will manage the network used by the pods
+* **Container Runtinme** : THis component will run the container
+
+#### 7.2 What are we going to do in this course part
+
+#### 7.3 Download the binaries
 
 First download the binaries need on the worker node:
 ```bash
@@ -44,7 +56,7 @@ sudo tar -xvf containerd-1.2.0-rc.0.linux-amd64.tar.gz -C /
 To do so type go to you fstab file (located in /etc/fstab) and comment (add #) to the file containing the Swap word.
 
 
-#### 7.3 CNI Networking
+#### 7.4 CNI Networking
 
 Now , here come a Tricky part , it's not hard , but the design could bug come people.
 
@@ -97,7 +109,7 @@ cat <<EOF | sudo tee /etc/cni/net.d/99-loopback.conf
 EOF
 ```
 
-#### 7.4 Container Runtime Setup
+#### 7.5 Container Runtime Setup
 
 ```bash
 sudo mkdir -p /etc/containerd/
@@ -144,7 +156,7 @@ WantedBy=multi-user.target
 EOF
 ```
 
-#### 7.5 Configuring Kubelet
+#### 7.6 Configuring Kubelet
 
 ```bash
 sudo cp /${HOSTNAME}-key.pem /${HOSTNAME}.pem /var/lib/kubelet/
@@ -203,7 +215,7 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 ```
-#### 7.6 Kube-Proxy Setup
+#### 7.7 Kube-Proxy Setup
 
 ```bash
 sudo cp kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
