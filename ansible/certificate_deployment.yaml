@@ -1,12 +1,17 @@
+#This playbook was used in my Kubernetes Hard Way courses , it will deploy the certificates & kubeconfig on hosts , creates some folders and download the binaries among other tweaks neededs
 ---
 - hosts: all
-  vars:
-   users:
-     - popopame
 
+#Installation of needed packet and update of the server
 
-#Installation of needed packet and update of the distant host
   tasks:
+   - name: "Update of the System"
+     apt:
+       name: "*"
+       state: latest
+       update_cache: yes
+       force_apt_get: yes
+
    - name: "Installation of 3 packet that will help us later"
      apt:
        name: "{{ packages }}"
@@ -18,32 +23,22 @@
          - socat
          - wget
          - vim
-   - name: "Update of the System"
-     apt:
-       name: "*"
-       state: latest
-       update_cache: yes
-       force_apt_get: yes
 
-#Creation of user/s referenced in "users" var , and creation of their ssh key
+   - name: "Deploy the hosts files on all the member of the cluster"
+     blockinfile:
+       path: '/etc/hosts'
+       block: |
+        {{lookup('file' , '/etc/hosts') }}
 
-   - name: "Create user accounts and add users to admin groups"
-     user:
-       name: "{{ item }}"
-       groups: "root"
-     with_items: "{{ users }}"
-   - name: "Add authorized key"
-     authorized_key:
-       user: "{{ item }}"
-       state: "present"
-       key: "{{ lookup('file', '/KHW/ansible/inventory/'+item+'.key.pub') }}"
-     with_items: "{{ users }}"
-   - name: "Allow admin users to sudo without password"
-     lineinfile:
-       dest: "/etc/sudoers"
-       state: "present"
-       regexp: "^%root"
-       line: "%root ALL=(ALL) NOPASSWD: ALL"
+   - name:
+     file:
+       state: directory
+       path: "{{ folders }}"
+     vars:
+       folders:
+         - /root/pki
+         - /root/K8S_bin
+         - /root/kubeconfig
 
 #Deploiement of the certificate and the key on the hosts
 - hosts: kube-masters
@@ -51,90 +46,122 @@
      - name: "Upload the api key on the Masters nodes"
        copy:
             src: "/KHW/pki/api/kubernetes-key.pem"
-            dest: "/"
+            dest: "/root/pki"
      - name: "Copy the api certificate on the masters"
        copy:
             src: "/KHW/pki/api/kubernetes.pem"
-            dest: "/"
+            dest: "/root/pki"
      - name: "Copy the CA on the master"
        copy:
             src: "/KHW/pki/ca/ca.pem"
-            dest: "/"
+            dest: "/root/pki"
      - name: "Copy the CA  key on the master"
        copy:
             src: "/KHW/pki/ca/ca-key.pem"
-            dest: "/"
-
-
+            dest: "/root/pki"
      - name: "Copy the service account key"
        copy:
             src: "/KHW/pki/service-account/service-account-key.pem"
-            dest: "/"
+            dest: "/root/pki"
      - name: "Copy the service account certificate"
        copy:
             src: "/KHW/pki/service-account/service-account.pem"
-            dest: "/"
+            dest: "/root/pki"
 
      - name: "Copy the service account certificate"
        copy:
             src: "/KHW/pki/service-account/service-account.pem"
-            dest: "/"
+            dest: "/root/pki"
+
+#Copy of the needed certificates on the slaves nodes
 
 - hosts: kube-slaves
+
+
   tasks:
       - name: "Copy the ca certificate on the slaves hosts"
         copy:
           src: "/KHW/pki/ca/ca.pem"
-          dest: "/"
+          dest: "/root/pki"
 
-- hosts: slave01
-  tasks:
-     - name: "Copy the slave01 clients key on slave01"
-       copy:
-            src: "/KHW/pki/clients/slave01-key.pem"
-            dest: "/"
-     - name: "Copy the slave01 clients certificate on slave01"
-       copy:
-            src: "/KHW/pki/clients/slave01.pem"
-            dest: "/"
+      - name: "Copy of the slave key on each slave "
+        copy:
+            src: "/KHW/pki/clients/{{ inventory_hostname }}-key.pem"
+            dest: "/root/pki"
+      - name: "Copy the slave certificate on slave0"
+        copy:
+            src: "/KHW/pki/clients/{{ inventory_hostname }}.pem"
+            dest: "/root/pki"
 
-- hosts: slave02
-  tasks:
-    - name: "Copy the slave02 clients key on slave02"
-      copy:
-           src: "/KHW/pki/clients/slave02-key.pem"
-           dest: "/"
-    - name: "Copy the slave02 clients certificate on slave01"
-      copy:
-           src: "/KHW/pki/clients/slave02.pem"
-           dest: "/"
 
-- hosts: slave03
-  tasks:
-    - name: "Copy the slave03 clients key on slave03"
-      copy:
-           src: "/KHW/pki/clients/slave03-key.pem"
-           dest: "/"
-    - name: "Copy the slave03 clients certificate on slave03"
-      copy:
-           src: "/KHW/pki/clients/slave03.pem"
-           dest: "/"
-
+# Download the binaries on the distants hosts
 - hosts: kube-masters
   tasks:
      - name: "Downloading the Kubectl , Kube-apiserver , Kube-scheduler and Kube-controller binaries , this will take a while depending on your connection (500 MO download)"
        get_url:
             url: "{{links}}"
-            dest: "/"
+            dest: "/root/K8S_bin"
        vars:
          links:
-          -https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-apiserver
-          -https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-controller-manager
-          -https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-scheduler
-          -https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kubect
+          - 'https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-apiserver'
+          - 'https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-controller-manager'
+          - 'https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-scheduler'
+          - 'https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kubect'
 
 
      - name: "Downloading the etcd binaries"
        get_url:
             url: "https://github.com/etcd-io/etcd/releases/download/v3.4.2/etcd-v3.4.2-linux-amd64.tar.gz"
-            dest: "/"
+            dest: "/root/K8S_bin"
+
+
+- hosts: kube-slaves
+  tasks:
+     - name: "Downloading the Kubectl , Kube-apiserver , Kube-scheduler and Kube-controller binaries , this will take a while depending on your connection (500 MO download)"
+       get_url:
+            url: "{{links}}"
+            dest: "/root/K8S_bin"
+       vars:
+         links:
+          - 'https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.15.0/crictl-v1.15.0-linux-amd64.tar.gz'
+          - 'https://github.com/opencontainers/runc/releases/download/v1.0.0-rc8/runc.amd64'
+          - 'https://github.com/containernetworking/plugins/releases/download/v0.8.2/cni-plugins-linux-amd64-v0.8.2.tgz'
+          - 'https://github.com/containerd/containerd/releases/download/v1.2.9/containerd-1.2.9.linux-amd64.tar.gz'
+          - 'https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kubectl'
+          - 'https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kube-proxy'
+          - 'https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kubelet'
+          - 'https://storage.googleapis.com/kubernetes-the-hard-way/runsc-50c283b9f56bb7200938d9e207355f05f79f0d17'
+
+
+#Upload of the kubeconfig on the hostnames
+
+#Copy the admin , controller and scheduler kubeconfig file on the masters nodes
+#Second task will deploy the encryption key on all the masters
+- hosts: kube-masters
+  tasks:
+     - name: "Upload the Admin, Controller and Sheduler kubeconfig on Master"
+       copy:
+            src: "/KHW/{{ item }}"
+            dest: "/root/kubeconfig"
+       with_items:
+         ['configs/admin/admin.kubeconfig','configs/controller/kube-controller-manager.kubeconfig','configs/scheduler/kube-scheduler.kubeconfig']
+
+     - name: "Upload the encryption Key"
+       copy:
+            src: "/KHW/configs/encrypt/encryption-config.yaml"
+            dest: "/root/"
+
+#Ths below will copy the Proxy Kubeconfig on the slaves nodes
+#And the second Task will deploythr clients Kubeconfig on each respective note
+
+
+- hosts: kube-slaves
+  tasks:
+      - name: "Copy the proxy kubeconfig on the slaves nodes"
+        copy:
+            src: "/KHW/configs/proxy/kube-proxy.kubeconfig"
+            dest: "/root/kubeconfig"
+      - name: "Copy the client kubeconfig on each node"
+        copy:
+            src: "/KHW/configs/clients/{{ inventory_hostname }}.kubeconfig"
+            dest: "/root/kubeconfig"

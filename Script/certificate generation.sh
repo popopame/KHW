@@ -1,11 +1,18 @@
+#This script is a work in progress , do not pay attention to the all the flaws present in it...
+
 #Below are the variables that you need to customise so that they correspond to your envirronement
 
-TLS_C="FR"
-TLS_L="Neuilly-Plaisance"
+read -p "Input the code of your country , FR for France , US for United State , ect..." TLS_C
+read -p "Inpute the name of your city" TLS_L
+read -p "Input your state" TLS_ST
+
+read -p "Input the Slaves IPS , separated by a space" SLAVES_IPS
+
+read -p "Input the Master IPS , separated by a Space" MASTER_IPS
+
 TLS_OU="Kubernetes The Hard Way"
-TLS_ST="Seine-Saint-Denis"
-declare -a SLAVES_IPS=("10.98.0.104" "10.98.0.105" "10.98.0.106")
-declare -a SLAVES_HOSTNAMES=("slave01" "slave02" "slave03")
+
+SLAVES_HOSTNAMES=("slave01" "slave02" "slave03")
 EXTERNAL_IP=$(curl -s -4 https://ifconfig.co)
 
 mkdir -p pki/{admin,api,ca,clients,controller,proxy,scheduler,service-account}
@@ -27,7 +34,6 @@ cat > pki/ca/ca-config.json <<EOF
     }
   }
 }
-EOF
 EOF
 
 cat > pki/ca/ca-csr.json <<EOF

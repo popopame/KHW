@@ -1,0 +1,15 @@
+---
+- hosts: all
+
+  tasks:
+  - name: "Deploy the hosts files on all the member of the cluster"
+    blockinfile:
+     path: /etc/ssh/sshd_config
+     block: |
+      10.98.0.100 loadbalancer
+      10.98.0.101 master01
+      10.98.0.102 master02
+      10.98.0.103 master03
+      10.98.0.104 slave01
+      10.98.0.105 slave02
+      10.98.0.106 slave03

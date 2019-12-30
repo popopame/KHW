@@ -261,7 +261,7 @@ ok
 ```
 
 If you do not have this in return , or is you have an error (403,4O4 , or another).
-Go to the log file of the nginx procy (locate in ```bash /var/log\nginx```)
+Go to the log file of the nginx proxy (locate in ```bash /var/log\nginx```)
 
 
 #### 4.7 RBAC

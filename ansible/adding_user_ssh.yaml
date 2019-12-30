@@ -1,0 +1,29 @@
+#This Ansible PLaybook , will Create User , add their ssh key and allow passwordless sudo
+---
+- name: "Create project users and add the SSh key"
+- hosts: all
+  vars:
+   users:
+     - quarion
+     - popopame
+     - azrael
+
+
+  tasks:
+   - name: "Create user accounts and add users to admin groups"
+     user:
+       name: "{{ item }}"
+       groups: "wheel"
+       createhome: no
+     with items: "{{ users }}"
+   - name: "Add authorized key"
+     authorized_key:
+       user: #{{ item }}
+       key: "{{ lookup('file', './'+item) }}"
+     with items: "{{ users }}"
+   - name: "Allow admin users to sudo without passwor"
+     lineinfile:
+       dest: "/etc/sudoers"
+       state: "present"
+       regexp: "^%admin"
+       line: "%admin ALL=(ALL) NOPASSWD: ALL"

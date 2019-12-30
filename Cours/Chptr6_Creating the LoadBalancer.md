@@ -81,13 +81,21 @@ curl --cacert ca.pem https://10.98.0.100:6443/version
 
 #### 6.3 Nginx Loadbalancer
 
+
+Firt we will install the binaries
 ```bash
 apt-get install -y nginx
 systemctl enable nginx
+```
+
+Then we create the configuration file that we will adjust to our needs
+```bash
 mkdir -p /etc/nginx/tcpconf.d
 vim /etc/nginx/nginx.conf
 ```
-and add at the end:
+
+And add at the end of the file:
+
 ```bash
 include /etc/nginx/tcpconf.d/*;
 ```
@@ -96,7 +104,7 @@ Then create the LoadBalancer file:
 cat << EOF | sudo tee /etc/nginx/tcpconf.d/kubernetes.conf
 stream {
     upstream kubernetes {
-        server 10.98.0.101:6443;
+        server 10.98.0.101:6443; #You need to adjust the IP to your masters
         server 10.98.0.102:6443;
         server 10.98.0.103:6443;
     }
@@ -113,6 +121,10 @@ EOF
 Try a curl to see if this work:
 ```bash
 curl --cacert ca.pem https://10.98.0.100:6443/version
+```
+or check if this work on you localhost
+```bash
+curl -k https://localhost:6443/version
 ```
 (you need to be in a folder with ca.pem in it to work)
 

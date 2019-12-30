@@ -1,4 +1,4 @@
-### 7 Configuring the Worker Nodes
+ ### 7 Configuring the Worker Nodes
 
 #### 7.1 What is a Kubernetes Worker NODE
 
@@ -10,7 +10,7 @@ Theses nodes have the services necessary to run the apps and will be managed by 
 We are going to install theses components:
 * **kubelet** Control each worker node , they will provide the API on wich the control plane  will interact
 * **kube-proxy**: Will manage the network used by the pods
-* **Container Runtinme** : THis component will run the container
+* **Container Runtinme** : This component will run the container
 
 #### 7.2 What are we going to do in this course part
 
@@ -77,7 +77,8 @@ Declare this variable on the respective node , and then ,we can proceed;
 
 ##### CNI Config Files
 
-
+Below we will define the CNI Config files.
+CNI stand for Contener Network Interface , it will be used to give to every Container a virtual interface.
 Define the CNI Bridge Network Config File.
 ```bash
 cat <<EOF | sudo tee /etc/cni/net.d/10-bridge.conf
